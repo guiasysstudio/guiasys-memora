@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://memora.guiasys.online/sitemap.xml

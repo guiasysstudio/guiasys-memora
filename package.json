@@ -1,0 +1,12 @@
+{
+  "name": "memora-github-pages",
+  "private": true,
+  "version": "1.1.0",
+  "description": "Frontend do GuiaSys Memora para GitHub Pages com Firebase Google + E-mail e futura API própria.",
+  "scripts": {
+    "dev": "http-server . -p 5500 -c-1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
