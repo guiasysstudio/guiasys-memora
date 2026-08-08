@@ -1,9 +1,10 @@
-export const APP_CONFIG = {
-  // Endereço futuro da API própria instalada no seu servidor.
-  apiBaseUrl: "",
+const local = ["localhost", "127.0.0.1"].includes(location.hostname);
 
-  // Enquanto a API ainda não estiver publicada, o site funciona em demonstração.
-  demoMode: true,
+export const APP_CONFIG = {
+  // Em teste local, o site conversa com o Memora Server local automaticamente.
+  // Em produção, continuará em demonstração até publicarmos a API HTTPS no servidor físico.
+  apiBaseUrl: local ? "http://127.0.0.1:8787" : "",
+  demoMode: !local,
 
   maxUploadMb: 95,
   requireLoginForCreate: true,

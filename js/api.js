@@ -47,6 +47,13 @@ async function authorizedFetch(path, options = {}) {
   return data;
 }
 
+export async function getMyAlbums() {
+  if (isDemoMode) {
+    return { albums: readDemoAlbums().map((item) => item.album) };
+  }
+  return authorizedFetch("/api/albums/mine", { cache: "no-store" });
+}
+
 export async function createAlbum({ title, description }) {
   if (isDemoMode) {
     const album = {
