@@ -4,3 +4,122 @@
 
 /* Autenticação Memora — Google + E-mail */
 .auth-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:20px}.auth-modal__backdrop{position:absolute;inset:0;border:0;background:#102d29bf;backdrop-filter:blur(8px);cursor:pointer}.auth-card{position:relative;z-index:1;width:min(440px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fffaf0;border:1px solid #ffffff66;border-radius:28px;padding:30px;box-shadow:0 30px 90px #071d1a55}.auth-card__close{position:absolute;right:17px;top:15px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:#fff8;color:var(--ink);font-size:22px;cursor:pointer}.auth-card__brand{margin-bottom:26px}.auth-card__brand .brand{display:inline-flex}.auth-card h2{font-size:clamp(30px,6vw,43px);line-height:1;letter-spacing:-.04em;margin:8px 0 12px}.auth-card__intro{color:var(--muted);line-height:1.55;margin:0 0 22px}.google-auth-button{width:100%;min-height:52px;border:1px solid var(--line);border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;gap:11px;color:var(--ink);font-weight:800;cursor:pointer}.google-auth-button:hover{background:#fffdf8}.google-auth-button span{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;border:1px solid var(--line);font-family:Arial,sans-serif;font-size:15px}.auth-divider{display:flex;align-items:center;gap:12px;color:#796f63;font-size:11px;text-transform:uppercase;letter-spacing:.12em;margin:20px 0}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}.auth-form{display:grid;gap:13px}.auth-form .field{margin:0}.auth-form__status{margin:0;padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.4}.auth-form__status--error{background:#ffe7e0;color:#8b3427}.auth-form__status--ok{background:#e2f2e8;color:#285e48}.auth-secondary,.auth-switch{display:flex;justify-content:center;align-items:center;gap:10px;margin:18px 0 0;color:var(--muted);font-size:12px}.auth-secondary button,.auth-switch button{border:0;background:none;color:var(--forest);font-weight:800;cursor:pointer;padding:3px}.account-details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}.account-details>div{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff8}.account-details span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}.account-details b{font-size:12px}.auth-card>.button+.button{margin-top:10px}@media (width<=520px){.auth-modal{padding:10px}.auth-card{border-radius:22px;padding:24px 20px}.account-details{grid-template-columns:1fr}.auth-secondary{flex-wrap:wrap}}
+
+.upload-progress{background:#fff;border:1px solid #18332e17;border-radius:11px;margin-top:12px;padding:12px}
+.upload-progress__top{justify-content:space-between;align-items:center;gap:10px;display:flex}
+.upload-progress__top strong{min-width:0;text-overflow:ellipsis;white-space:nowrap;font-size:11px;overflow:hidden}
+.upload-progress__top span{color:var(--coral-dark);font-size:11px;font-weight:800}
+.upload-progress__track{background:#18332e12;border-radius:999px;height:8px;margin:9px 0 7px;overflow:hidden}
+.upload-progress__track span{background:var(--coral);border-radius:inherit;width:0;height:100%;transition:width .18s ease;display:block}
+.upload-progress>small{color:var(--muted);font-size:9px;line-height:1.45;display:block}
+
+
+/* === Passo 9: identidade SVG, Material Symbols e previews === */
+.ms-icon{
+  --icon-mask:none;
+  display:inline-block;
+  width:1.15em;
+  height:1.15em;
+  flex:0 0 auto;
+  background:currentColor;
+  vertical-align:-.16em;
+  -webkit-mask:var(--icon-mask) center/contain no-repeat;
+  mask:var(--icon-mask) center/contain no-repeat
+}
+.ms-icon--spin{animation:memora-icon-spin 1s linear infinite}
+@keyframes memora-icon-spin{to{transform:rotate(360deg)}}
+
+.brand{gap:9px;line-height:1}
+.brand__logo{display:block;width:156px;max-width:38vw;height:auto}
+.brand__mark-image{display:block;width:39px;height:39px;object-fit:contain}
+.brand__inverse-word{color:#fff;font-size:24px;font-weight:750;letter-spacing:-.045em}
+.footer .brand__mark-image{width:36px;height:36px}
+.auth-card__brand .brand__logo{width:170px;max-width:70%}
+
+.button .ms-icon,.gallery-share .ms-icon,.text-link .ms-icon{font-size:17px}
+.auth-user__exit{display:grid;place-items:center}
+.auth-user__exit .ms-icon{font-size:16px}
+.auth-card__close{display:grid;place-items:center}
+.auth-card__close .ms-icon{font-size:18px}
+
+.step-icon .ms-icon{font-size:24px}
+.owned-empty>span .ms-icon{font-size:25px}
+.owned-card>.ms-icon{font-size:21px}
+.create-panel__heading>span .ms-icon,.upload-panel__heading>span .ms-icon{font-size:22px}
+.dropzone__icon .ms-icon{font-size:34px}
+.upload-panel__trust>span{display:grid;place-items:center}
+.upload-panel__trust>span .ms-icon{font-size:17px}
+.album-stats span{display:inline-flex;align-items:center;gap:6px}
+.album-stats .ms-icon{font-size:14px;opacity:.7}
+.gallery-share{display:inline-flex;align-items:center;gap:7px}
+
+.media-card__thumbnail{width:100%;height:100%;object-fit:cover;display:block}
+.media-card__preview-state{
+  min-height:100%;
+  width:100%;
+  background:linear-gradient(145deg,#eae2d6,#d9d1c7);
+  color:#52615c;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px
+}
+.media-card__preview-state .ms-icon{font-size:30px}
+.media-card__preview-state small{font-size:10px;font-weight:750}
+.media-card__preview-state--processing{background:linear-gradient(145deg,#f6f0e6,#e9ded1);color:var(--coral-dark)}
+.media-card__preview-state--error{background:linear-gradient(145deg,#eee5df,#dbc9c1);color:#995345}
+.video-play{
+  position:absolute;
+  inset:50% auto auto 50%;
+  transform:translate(-50%,-50%);
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:#fffdf8e8;
+  color:var(--forest);
+  display:grid;
+  place-items:center;
+  z-index:2;
+  box-shadow:0 8px 24px #102b2630;
+  pointer-events:none
+}
+.video-play .ms-icon{font-size:26px;margin-left:2px}
+
+.lightbox__close .ms-icon{font-size:18px}
+.lightbox__nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:4;
+  width:44px;
+  height:44px;
+  border:1px solid #ffffff33;
+  border-radius:50%;
+  background:#0b1f1bd1;
+  color:#fff;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  backdrop-filter:blur(5px)
+}
+.lightbox__nav:hover{background:#0b1f1bf2}
+.lightbox__nav--prev{left:16px}
+.lightbox__nav--next{right:16px}
+.lightbox__nav .ms-icon{font-size:26px}
+.lightbox__media{position:relative}
+.danger-link{display:flex;align-items:center;justify-content:center;gap:7px}
+.danger-link .ms-icon{font-size:16px}
+.album-error-icon{display:inline-grid;place-items:center;color:var(--coral);font-size:58px}
+.album-error-icon .ms-icon{font-size:1em}
+
+@media (width<=760px){
+  .brand__logo{width:132px;max-width:42vw}
+  .album-topbar .button .button-label{display:none}
+  .album-topbar .button .ms-icon{font-size:20px}
+  .gallery-share>span{display:none}
+  .gallery-share .ms-icon{font-size:21px}
+  .lightbox__nav{width:40px;height:40px}
+  .lightbox__nav--prev{left:10px}
+  .lightbox__nav--next{right:10px}
+}

@@ -104,10 +104,28 @@ Resposta `201`:
     "uploaderName": "Andrew",
     "createdAt": "2026-08-08T03:45:13Z",
     "kind": "image",
-    "url": "/api/media/uuid/file"
+    "url": "/api/media/uuid/file",
+    "thumbnailUrl": "/api/media/uuid/thumbnail",
+    "previewStatus": "ready"
   }
 }
 ```
+
+
+## Miniatura / preview
+
+`GET /api/media/:id/thumbnail`
+
+A API retorna este endereço em `thumbnailUrl` somente quando `previewStatus` for `ready`.
+
+Estados possíveis:
+
+- `pending`: aguardando processamento;
+- `processing`: FFmpeg gerando a miniatura;
+- `ready`: miniatura pronta;
+- `error`: houve falha no processamento.
+
+A galeria deve carregar `thumbnailUrl` e deixar o arquivo original para o visualizador/download.
 
 ## Servir foto/vídeo
 
