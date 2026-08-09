@@ -267,8 +267,17 @@ function formatDate(value) {
 }
 
 function formatBytes(bytes) {
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  const value = Number(bytes || 0);
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+  if (value < 1024 * 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(value / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+function formatUploadLimit() {
+  return APP_CONFIG.maxUploadMb >= 1024
+    ? `${(APP_CONFIG.maxUploadMb / 1024).toFixed(APP_CONFIG.maxUploadMb % 1024 ? 1 : 0)} GB`
+    : `${APP_CONFIG.maxUploadMb} MB`;
 }
 
 async function copyOrShareAlbum(slug, title) {
@@ -319,7 +328,7 @@ function drawAlbum() {
   root.innerHTML = `${setupBanner()}<main class="album-page">
     <header class="album-topbar"><div class="page-width album-topbar__inner">${brand()}<div class="album-topbar__actions"><span data-auth-slot>${authControlHtml()}</span>${viewerIsOwner ? `<span class="owner-badge">Modo proprietário</span>` : ""}<button class="button button--ghost button--small" data-share-album>Compartilhar álbum <span aria-hidden="true">↗</span></button></div></div></header>
     <section class="album-hero"><div class="page-width album-hero__inner"><div class="album-hero__copy"><p class="eyebrow eyebrow--light"><span></span> Álbum compartilhado</p><h1>${esc(album.title)}</h1><p>${esc(album.description || "Cada olhar guarda um pedaço diferente deste momento.")}</p><div class="album-stats"><span><b>${images}</b> ${images === 1 ? "foto" : "fotos"}</span><span><b>${videos}</b> ${videos === 1 ? "vídeo" : "vídeos"}</span><span><b>${people}</b> pessoas</span></div></div><div class="album-hero__ornament" aria-hidden="true"><span>memórias<br>em comum</span><i></i></div></div></section>
-    <section class="album-content page-width"><aside class="upload-panel"><div class="upload-panel__heading"><span>＋</span><div><p>Sua vez</p><h2>Adicione seus momentos</h2></div></div><label class="field field--compact" for="uploader-name"><span>Como devemos identificar você?</span><input id="uploader-name" maxlength="50" placeholder="Seu nome" value="${esc(suggestedName)}"></label><label class="dropzone" id="dropzone"><input id="media-input" accept="image/*,video/*" multiple type="file"><span class="dropzone__icon" aria-hidden="true">↑</span><strong id="dropzone-title">Escolher fotos e vídeos</strong><small>ou arraste os arquivos para cá</small><em>Até ${APP_CONFIG.maxUploadMb} MB por arquivo</em></label><p class="upload-success" id="upload-success" hidden></p><p class="form-error form-error--album" id="upload-error" hidden></p><div class="upload-panel__trust"><span aria-hidden="true">✓</span><p><b>Arquivos originais</b><br>Sem reduzir a qualidade</p></div></aside>
+    <section class="album-content page-width"><aside class="upload-panel"><div class="upload-panel__heading"><span>＋</span><div><p>Sua vez</p><h2>Adicione seus momentos</h2></div></div><label class="field field--compact" for="uploader-name"><span>Como devemos identificar você?</span><input id="uploader-name" maxlength="50" placeholder="Seu nome" value="${esc(suggestedName)}"></label><label class="dropzone" id="dropzone"><input id="media-input" accept="image/*,video/*" multiple type="file"><span class="dropzone__icon" aria-hidden="true">↑</span><strong id="dropzone-title">Escolher fotos e vídeos</strong><small>ou arraste os arquivos para cá</small><em>Até ${formatUploadLimit()} por arquivo · envio retomável</em></label><div class="upload-progress" id="upload-progress" hidden><div class="upload-progress__top"><strong id="upload-progress-label">Preparando upload…</strong><span id="upload-progress-percent">0%</span></div><div class="upload-progress__track" aria-hidden="true"><span id="upload-progress-bar"></span></div><small id="upload-progress-detail">Aguardando…</small></div><p class="upload-success" id="upload-success" hidden></p><p class="form-error form-error--album" id="upload-error" hidden></p><div class="upload-panel__trust"><span aria-hidden="true">✓</span><p><b>Arquivos originais</b><br>Sem reduzir a qualidade · se a conexão cair, selecione o mesmo arquivo para continuar</p></div></aside>
       <div class="gallery-column"><div class="gallery-heading"><div><p class="eyebrow"><span></span> Galeria do álbum</p><h2>${media.length ? `${media.length} momentos reunidos` : "O primeiro momento começa com você"}</h2></div><button class="gallery-share" data-share-album>Convidar pessoas <span>↗</span></button></div>${galleryHtml(state)}</div>
     </section>
     <footer class="album-footer page-width">${brand()}<p>Um álbum feito por todos que estavam lá.</p></footer>
@@ -341,44 +350,105 @@ function drawAlbum() {
 async function handleUpload(files) {
   if (!files.length || !currentAlbumState) return;
   if (!(await requireLogin("upload"))) return;
+
   const nameInput = document.getElementById("uploader-name");
   const uploaderName = nameInput.value.trim();
   const errorBox = document.getElementById("upload-error");
   const successBox = document.getElementById("upload-success");
   const title = document.getElementById("dropzone-title");
+  const progress = document.getElementById("upload-progress");
+  const progressLabel = document.getElementById("upload-progress-label");
+  const progressPercent = document.getElementById("upload-progress-percent");
+  const progressBar = document.getElementById("upload-progress-bar");
+  const progressDetail = document.getElementById("upload-progress-detail");
+  const mediaInput = document.getElementById("media-input");
+
   if (uploaderName.length < 2) {
     errorBox.textContent = "Escreva seu nome antes de adicionar os arquivos.";
     errorBox.hidden = false;
     nameInput.focus();
     return;
   }
+
   const maxBytes = APP_CONFIG.maxUploadMb * 1024 * 1024;
   const tooLarge = files.find((file) => file.size > maxBytes);
   if (tooLarge) {
-    errorBox.textContent = `“${tooLarge.name}” ultrapassa ${APP_CONFIG.maxUploadMb} MB.`;
+    errorBox.textContent = `“${tooLarge.name}” ultrapassa o limite de ${formatUploadLimit()}.`;
     errorBox.hidden = false;
     return;
   }
+
+  const invalid = files.find((file) => {
+    const type = String(file.type || "").toLowerCase();
+    return type && !type.startsWith("image/") && !type.startsWith("video/");
+  });
+  if (invalid) {
+    errorBox.textContent = `“${invalid.name}” não é uma foto ou vídeo reconhecido.`;
+    errorBox.hidden = false;
+    return;
+  }
+
   localStorage.setItem(UPLOADER_KEY, uploaderName);
   errorBox.hidden = true;
   successBox.hidden = true;
-  document.getElementById("media-input").disabled = true;
+  progress.hidden = false;
+  mediaInput.disabled = true;
+
+  const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+  let finishedBytes = 0;
+  let resumedAny = false;
+
+  const updateProgress = ({ file, fileIndex, uploadedBytes, resumed }) => {
+    resumedAny ||= Boolean(resumed);
+    const overallBytes = Math.min(totalBytes, finishedBytes + uploadedBytes);
+    const overallPercent = totalBytes ? Math.floor((overallBytes / totalBytes) * 100) : 0;
+    const filePercent = file.size ? Math.floor((uploadedBytes / file.size) * 100) : 0;
+
+    progressLabel.textContent = `${resumed ? "Retomando" : "Enviando"} ${fileIndex + 1} de ${files.length}: ${file.name}`;
+    progressPercent.textContent = `${overallPercent}%`;
+    progressBar.style.width = `${overallPercent}%`;
+    progressDetail.textContent = `${filePercent}% deste arquivo · ${formatBytes(uploadedBytes)} de ${formatBytes(file.size)}`;
+    title.textContent = resumed ? `Retomando: ${file.name}` : `Enviando: ${file.name}`;
+  };
+
   try {
     for (let index = 0; index < files.length; index += 1) {
-      title.textContent = `Enviando ${index + 1} de ${files.length}: ${files[index].name}`;
-      await uploadMedia(currentAlbumState.slug, files[index], uploaderName);
+      const file = files[index];
+      updateProgress({ file, fileIndex: index, uploadedBytes: 0, resumed: false });
+
+      await uploadMedia(currentAlbumState.slug, file, uploaderName, {
+        onProgress({ uploadedBytes, resumed }) {
+          updateProgress({ file, fileIndex: index, uploadedBytes, resumed });
+        },
+      });
+
+      finishedBytes += file.size;
+      updateProgress({ file, fileIndex: index, uploadedBytes: file.size, resumed: resumedAny });
     }
+
+    progressPercent.textContent = "100%";
+    progressBar.style.width = "100%";
+    progressLabel.textContent = "Upload concluído";
+    progressDetail.textContent = `${files.length} ${files.length === 1 ? "arquivo enviado" : "arquivos enviados"} com sucesso.`;
+
     const refreshed = await getAlbum(currentAlbumState.slug, currentAlbumState.ownerToken);
     currentAlbumState = { ...refreshed, slug: currentAlbumState.slug, ownerToken: currentAlbumState.ownerToken };
     drawAlbum();
+
     const newSuccess = document.getElementById("upload-success");
-    newSuccess.textContent = isDemoMode ? "Mídia adicionada nesta sessão de demonstração. Ao recarregar a página, ela será perdida." : "Tudo pronto! Os novos momentos já estão no álbum.";
+    newSuccess.textContent = isDemoMode
+      ? "Mídia adicionada nesta sessão de demonstração."
+      : resumedAny
+        ? "Tudo pronto! O envio foi retomado e concluído sem recomeçar do zero."
+        : "Tudo pronto! Os novos momentos já estão no álbum.";
     newSuccess.hidden = false;
   } catch (error) {
-    errorBox.textContent = error.message || "Não foi possível enviar os arquivos.";
+    errorBox.textContent = `${error.message || "Não foi possível enviar os arquivos."} Se a conexão tiver caído, selecione o mesmo arquivo novamente para continuar de onde parou.`;
     errorBox.hidden = false;
     title.textContent = "Escolher fotos e vídeos";
-    document.getElementById("media-input").disabled = false;
+    progressLabel.textContent = "Upload interrompido";
+    progressDetail.textContent = "A parte já recebida fica guardada temporariamente para retomada.";
+    mediaInput.disabled = false;
   }
 }
 
